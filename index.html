@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>שאלון חידוד בריף — OptiPlan</title>
+  <link href="https://fonts.googleapis.com/css2?family=Varela+Round&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --navy: #1B365D;
+      --steel: #4A86B8;
+      --sky: #89C4E8;
+      --ice: #D6EAF5;
+      --white: #FFFFFF;
+      --text: #2C3E50;
+      --text-light: #5D6D7E;
+      --success: #27AE60;
+      --warning: #F39C12;
+      --danger: #E74C3C;
+      --gold: #C9A84C;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Varela Round', sans-serif;
+      color: var(--text);
+      background: #F5F7FA;
+      line-height: 1.65;
+      -webkit-font-smoothing: antialiased;
+    }
+    .page-container { max-width: 900px; margin: 0 auto; padding: 40px 32px 100px; }
+    h1, h2 { color: var(--navy); }
+    h1 { font-size: 2.2rem; font-weight: 700; margin-bottom: 8px; }
+    h2 { font-size: 1.5rem; font-weight: 600; margin-bottom: 16px; margin-top: 48px; }
+    .header-bar { height: 4px; background: linear-gradient(to left, var(--navy), var(--steel), var(--sky)); border-radius: 4px 4px 0 0; }
+    .page-header { background: var(--white); border-radius: 4px; padding: 32px; margin-bottom: 32px; border: 1px solid var(--ice); }
+    .logo-text { font-weight: 700; font-size: 1rem; color: var(--steel); letter-spacing: 2px; text-transform: uppercase; }
+    .page-subtitle { font-size: 0.95rem; color: var(--text-light); margin-top: 8px; }
+    .meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 16px; font-size: 0.85rem; color: var(--text-light); }
+    .meta-grid span { display: flex; gap: 6px; }
+    .meta-label { font-weight: 600; color: var(--text); }
+    .progress-wrap { margin-top: 20px; }
+    .progress-bar { background: var(--ice); border-radius: 10px; height: 8px; overflow: hidden; }
+    .progress-fill { background: linear-gradient(to left, var(--success), var(--steel)); height: 100%; border-radius: 10px; transition: width 0.4s ease; width: 0%; }
+    .progress-text { font-size: 0.8rem; color: var(--text-light); margin-top: 6px; text-align: left; }
+    .section-card { background: var(--white); border: 1px solid var(--ice); border-radius: 4px; margin-bottom: 24px; overflow: hidden; }
+    .section-header { background: var(--navy); color: var(--white); padding: 16px 24px; display: flex; align-items: center; gap: 12px; }
+    .section-header h2 { color: var(--white); margin: 0; font-size: 1.25rem; }
+    .section-num { background: rgba(255,255,255,0.2); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; flex-shrink: 0; }
+    .question { padding: 24px; border-bottom: 1px solid var(--ice); }
+    .question:last-child { border-bottom: none; }
+    .q-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+    .q-num { background: var(--steel); color: var(--white); width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.75rem; flex-shrink: 0; transition: background 0.2s; }
+    .q-num.done { background: var(--success); }
+    .q-type { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--text-light); background: var(--ice); padding: 2px 8px; border-radius: 2px; }
+    .q-text { font-weight: 600; font-size: 1.05rem; color: var(--navy); margin-bottom: 16px; line-height: 1.5; }
+    .q-context { font-size: 0.85rem; color: var(--text-light); font-style: italic; margin-bottom: 12px; padding: 8px 12px; background: #FEF9E7; border-right: 3px solid var(--warning); border-radius: 0 4px 4px 0; }
+    .options { display: flex; flex-direction: column; gap: 8px; }
+    .option { display: flex; align-items: flex-start; gap: 10px; padding: 10px 14px; background: var(--ice); border-radius: 4px; cursor: pointer; transition: all 0.15s; border: 2px solid transparent; user-select: none; }
+    .option:hover { background: #C8DFF0; border-color: var(--steel); }
+    .option.sel { background: #B8D8F0; border-color: var(--steel); }
+    .option.sel .option-marker { background: var(--steel); color: var(--white); border-color: var(--steel); }
+    .option-marker { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--steel); flex-shrink: 0; margin-top: 1px; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; color: var(--steel); transition: all 0.15s; }
+    .option.multi .option-marker { border-radius: 3px; }
+    .option.multi.sel .option-marker { border-radius: 3px; }
+    .option-text { font-size: 0.95rem; line-height: 1.4; }
+    .likert-scale { display: flex; gap: 6px; flex-wrap: wrap; }
+    .likert-item { flex: 1; min-width: 100px; text-align: center; padding: 10px 8px; background: var(--ice); border-radius: 4px; cursor: pointer; border: 2px solid transparent; transition: all 0.15s; user-select: none; }
+    .likert-item:hover { border-color: var(--steel); background: #C8DFF0; }
+    .likert-item.sel { border-color: var(--steel); background: #B8D8F0; }
+    .likert-num { font-weight: 700; font-size: 1.2rem; color: var(--navy); }
+    .likert-label { font-size: 0.7rem; color: var(--text-light); margin-top: 4px; line-height: 1.3; }
+    .rank-items { display: flex; flex-direction: column; gap: 6px; }
+    .rank-item { display: flex; align-items: center; gap: 12px; padding: 10px 14px; background: var(--ice); border-radius: 4px; border: 2px solid transparent; cursor: grab; user-select: none; transition: all 0.15s; }
+    .rank-item:active { cursor: grabbing; }
+    .rank-item.dragging { opacity: 0.5; border-color: var(--steel); }
+    .rank-item.drag-over { border-color: var(--steel); background: #C8DFF0; }
+    .rank-handle { font-size: 0.8rem; color: var(--text-light); font-weight: 700; min-width: 24px; }
+    .rank-grip { color: var(--text-light); font-size: 1rem; cursor: grab; }
+    .summary-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+    .summary-table th { background: var(--navy); color: var(--white); padding: 12px 16px; font-weight: 600; text-align: right; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px; }
+    .summary-table td { padding: 10px 16px; border-bottom: 1px solid var(--ice); }
+    .summary-table tr:nth-child(even) { background: var(--ice); }
+    .summary-table tr:last-child { font-weight: 700; background: #E8F0FE; }
+    .export-bar { position: fixed; bottom: 0; left: 0; right: 0; background: var(--white); border-top: 1px solid var(--ice); padding: 14px 32px; display: flex; align-items: center; justify-content: center; box-shadow: 0 -4px 16px rgba(27,54,93,0.1); z-index: 100; }
+    .export-bar-inner { max-width: 900px; width: 100%; display: flex; align-items: center; justify-content: space-between; }
+    .export-btn { background: var(--navy); color: var(--white); border: none; padding: 12px 28px; border-radius: 4px; font-family: 'Varela Round', sans-serif; font-size: 0.95rem; font-weight: 700; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 8px; }
+    .export-btn:hover { background: var(--steel); }
+    .export-status { font-size: 0.85rem; color: var(--text-light); }
+    .export-status strong { color: var(--success); }
+    .reset-btn { background: transparent; color: var(--danger); border: 1px solid var(--danger); padding: 10px 20px; border-radius: 4px; font-family: 'Varela Round', sans-serif; font-size: 0.85rem; cursor: pointer; transition: all 0.2s; }
+    .reset-btn:hover { background: var(--danger); color: var(--white); }
+    .page-footer { margin-top: 48px; padding-top: 24px; border-top: 1px solid var(--ice); text-align: center; }
+    .footer-brand { font-weight: 700; color: var(--navy); letter-spacing: 2px; text-transform: uppercase; font-size: 0.8rem; }
+    .footer-separator { color: var(--sky); margin: 0 8px; }
+    .footer-tagline { font-size: 0.8rem; color: var(--text-light); }
+    .footer-meta { display: block; margin-top: 8px; font-size: 0.75rem; color: var(--text-light); }
+    @media (max-width: 600px) { .page-container { padding: 20px 16px 100px; } .meta-grid { grid-template-columns: 1fr; } .likert-scale { flex-direction: column; } .likert-item { min-width: unset; } }
+    @media print { body { background: white; } .export-bar { display: none; } }
+  </style>
+</head>
+<body>
+  <div class="page-container">
+    <div class="page-header">
+      <div class="header-bar"></div>
+      <div style="margin-top: 20px;">
+        <span class="logo-text">OptiPlan</span>
+        <h1 style="margin-top: 12px;">שאלון חידוד — בריף מוצר מעודכן</h1>
+        <p class="page-subtitle">37 שאלות סגורות לחידוד כוונות לקראת עדכון מסמך חזון המוצר</p>
+        <div class="meta-grid">
+          <span><span class="meta-label">עבור:</span> מאור דהן, עמית זומרפרוינד</span>
+          <span><span class="meta-label">הכין:</span> OPIUM — יועץ אסטרטגי</span>
+          <span><span class="meta-label">תאריך:</span> 18.02.2026</span>
+          <span><span class="meta-label">מקור:</span> בריף מקורי + הערות מאור</span>
+        </div>
+        <div class="progress-wrap">
+          <div class="progress-bar"><div class="progress-fill" id="pFill"></div></div>
+          <div class="progress-text" id="pText">0 / 37 שאלות נענו</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-card"><div class="section-header"><div class="section-num">א</div><h2>מיתוג ושפה שיווקית</h2></div>
+      <div class="question" data-q="1" data-type="single"><div class="q-header"><div class="q-num">1</div><span class="q-type">בחירה יחידה</span></div><div class="q-text">כיצד נכון לתאר את OptiPlan בחומרים שיווקיים ובבריף?</div><div class="options"><div class="option" data-v="א — פלטפורמה המאגדת מודולים רבים"><div class="option-marker">א</div><div class="option-text">פלטפורמה המאגדת <strong>מודולים רבים</strong> לניהול פרויקטי תשתית</div></div><div class="option" data-v="ב — מרכז פיקוד + מודולים"><div class="option-marker">ב</div><div class="option-text"><strong>מרכז פיקוד</strong> (דשבורד) שאליו מתחברים מודולים ספציפיים</div></div><div class="option" data-v="ג — שילוב: פלטפורמה מודולרית + דשבורד מרכזי"><div class="option-marker">ג</div><div class="option-text">שילוב — פלטפורמה מודולרית עם דשבורד מרכזי כנקודת הכניסה</div></div></div></div>
+      <div class="question" data-q="2" data-type="single"><div class="q-header"><div class="q-num">2</div><span class="q-type">כן / לא</span></div><div class="q-text">האם לציין מספר מדויק של מודולים בחומרים שיווקיים?</div><div class="q-context">מאור ציין שלוש פעמים: "לא לציין 6 מוצרים — לרשום מאגדת מודולים רבים"</div><div class="options"><div class="option" data-v="כן — מספר ספציפי"><div class="option-marker">✓</div><div class="option-text">כן — לציין מספר ספציפי</div></div><div class="option" data-v="לא — ניסוח פתוח"><div class="option-marker">✗</div><div class="option-text">לא — ניסוח פתוח ("מודולים רבים, לרבות...")</div></div></div></div>
+      <div class="question" data-q="3" data-type="single"><div class="q-header"><div class="q-num">3</div><span class="q-type">בחירה יחידה</span></div><div class="q-text">מהו המונח המועדף לתיאור רכיבי הפלטפורמה?</div><div class="options"><div class="option" data-v="מוצרים (products)"><div class="option-marker">א</div><div class="option-text">מוצרים (products)</div></div><div class="option" data-v="מודולים (modules)"><div class="option-marker">ב</div><div class="option-text">מודולים (modules)</div></div><div class="option" data-v="חבילות (packages)"><div class="option-marker">ג</div><div class="option-text">חבילות (packages)</div></div></div></div>
+      <div class="question" data-q="4" data-type="likert"><div class="q-header"><div class="q-num">4</div><span class="q-type">סולם 1–5</span></div><div class="q-text">עד כמה מטאפורת "בור הפיקוד" צריכה להיות מרכזית במיצוב?</div><div class="q-context">מאור אישר: "כן" — להשתמש בשיווק/מכירות</div><div class="likert-scale"><div class="likert-item" data-v="1"><div class="likert-num">1</div><div class="likert-label">פנימי בלבד</div></div><div class="likert-item" data-v="2"><div class="likert-num">2</div><div class="likert-label">מזדמן בשיחות</div></div><div class="likert-item" data-v="3"><div class="likert-num">3</div><div class="likert-label">אחד מכמה מסרים</div></div><div class="likert-item" data-v="4"><div class="likert-num">4</div><div class="likert-label">מסר מרכזי</div></div><div class="likert-item" data-v="5"><div class="likert-num">5</div><div class="likert-label">מטאפורה ראשית</div></div></div></div>
+      <div class="question" data-q="5" data-type="single"><div class="q-header"><div class="q-num">5</div><span class="q-type">בחירה יחידה</span></div><div class="q-text">"השוק לא חסר ___" — מה המילה הנכונה?</div><div class="q-context">מאור הציע לשנות "כלים" ל"פלטפורמות"</div><div class="options"><div class="option" data-v="כלים"><div class="option-marker">א</div><div class="option-text"><strong>כלים</strong> — האויב האמיתי הוא אקסל ווואטסאפ</div></div><div class="option" data-v="פלטפורמות"><div class="option-marker">ב</div><div class="option-text"><strong>פלטפורמות</strong> — מרים את רמת ההשוואה ומחזק בידול</div></div><div class="option" data-v="פתרונות"><div class="option-marker">ג</div><div class="option-text"><strong>פתרונות</strong> — ניסוח ניטרלי שמכסה הכל</div></div></div></div>
+    </div>
+
+    <div class="section-card"><div class="section-header"><div class="section-num">ב</div><h2>ארכיטקטורת המוצר — מודולים לעומת פלטפורמה</h2></div>
+      <div class="question" data-q="6" data-type="single"><div class="q-header"><div class="q-num">6</div><span class="q-type">בחירה יחידה</span></div><div class="q-text">מה המוקד המרכזי של חוויית המשתמש ב-OptiPlan?</div><div class="options"><div class="option" data-v="Hub Dashboard — נקודת כניסה"><div class="option-marker">א</div><div class="option-text"><strong>Hub Dashboard</strong> — נקודת הכניסה</div></div><div class="option" data-v="המודול הספציפי — כניסה ישירה"><div class="option-marker">ב</div><div class="option-text"><strong>המודול הספציפי</strong> — כל משתמש נכנס ישירות</div></div><div class="option" data-v="גישה מעורבת — תלוי בפרסונה"><div class="option-marker">ג</div><div class="option-text"><strong>גישה מעורבת</strong> — תלוי בפרסונה</div></div></div></div>
+      <div class="question" data-q="7" data-type="single"><div class="q-header"><div class="q-num">7</div><span class="q-type">כן / לא</span></div><div class="q-text">האם המודולים צריכים להיות גמישים לפי פרויקט?</div><div class="q-context">מאור: "דשבורד כללי שאליו יתחברו מודולים ספציפיים שמתאימים לכל פרויקט"</div><div class="options"><div class="option" data-v="כן — כל פרויקט מגדיר מודולים"><div class="option-marker">✓</div><div class="option-text">כן — כל פרויקט מגדיר אילו מודולים רלוונטיים</div></div><div class="option" data-v="לא — כל פרויקט מקבל הכל"><div class="option-marker">✗</div><div class="option-text">לא — כל פרויקט מקבל את הכל באופן אחיד</div></div></div></div>
+      <div class="question" data-q="8" data-type="single"><div class="q-header"><div class="q-num">8</div><span class="q-type">בחירה יחידה</span></div><div class="q-text">מה התיאור המדויק של OptiTrack?</div><div class="q-context">מאור: "בקרה ושליטה לתהליכי תיאום — לא רק היתרים, אלא הכל"</div><div class="options"><div class="option" data-v="תיאום היתרים (כבריף)"><div class="option-marker">א</div><div class="option-text"><strong>תיאום היתרים</strong> (כפי שכתוב בבריף)</div></div><div class="option" data-v="בקרה ושליטה לתהליכי תיאום — מורחב"><div class="option-marker">ב</div><div class="option-text"><strong>בקרה ושליטה לתהליכי תיאום</strong> — כולל תיאום הנדסי, היתרי חפירה, הסדרי תנועה, רישוי, בקרות מזמין</div></div></div></div>
+      <div class="question" data-q="9" data-type="single"><div class="q-header"><div class="q-num">9</div><span class="q-type">בחירה יחידה</span></div><div class="q-text">מה התיאור המדויק של OptiBiz?</div><div class="q-context">מאור: "תכנון פיננסי תקציבי של הפרויקט, כולל חוזי חשבונות, הוצאות, הגדלות, קבלני משנה"</div><div class="options"><div class="option" data-v="תכנון פיננסי (כבריף)"><div class="option-marker">א</div><div class="option-text"><strong>תכנון פיננסי</strong> (כפי שבבריף)</div></div><div class="option" data-v="תכנון פיננסי תקציבי מורחב"><div class="option-marker">ב</div><div class="option-text"><strong>תכנון פיננסי תקציבי של הפרויקט</strong> — כולל חוזי חשבונות, הוצאות, הגדלות, קבלני משנה</div></div></div></div>
+      <div class="question" data-q="10" data-type="single"><div class="q-header"><div class="q-num">10</div><span class="q-type">כן / לא</span></div><div class="q-text">האם הטבלה "המוצר במספרים" (42 ישויות, 74 עמודים) רלוונטית לבריף?</div><div class="q-context">מאור: "לדעתי אפשר למחוק, לא ברור כל כך"</div><div class="options"><div class="option" data-v="כן — להשאיר"><div class="option-marker">✓</div><div class="option-text">כן — להשאיר עם עדכונים</div></div><div class="option" data-v="לא — למחוק"><div class="option-marker">✗</div><div class="option-text">לא — למחוק</div></div></div></div>
+    </div>
+
+    <div class="section-card"><div class="section-header"><div class="section-num">ג</div><h2>קהל היעד — פרסונות</h2></div>
+      <div class="question" data-q="11" data-type="single"><div class="q-header"><div class="q-num">11</div><span class="q-type">בחירה יחידה</span></div><div class="q-text">היזם יכול להיות פרטי או ציבורי. כיצד להציג בבריף?</div><div class="q-context">מאור: "יזם פרטי — חברת נדל"ן, יזם ציבורי — נת"ע או עיריית ת"א"</div><div class="options"><div class="option" data-v="פרסונה אחת — מכסה שניהם"><div class="option-marker">א</div><div class="option-text"><strong>פרסונה אחת</strong> — "תמיר (יזם)" שמכסה שניהם</div></div><div class="option" data-v="שתי פרסונות נפרדות"><div class="option-marker">ב</div><div class="option-text"><strong>שתי פרסונות נפרדות</strong></div></div><div class="option" data-v="פרסונה אחת + שני תרחישים"><div class="option-marker">ג</div><div class="option-text"><strong>פרסונה אחת עם שני תרחישים</strong></div></div></div></div>
+      <div class="question" data-q="12" data-type="single"><div class="q-header"><div class="q-num">12</div><span class="q-type">בחירה יחידה</span></div><div class="q-text">מתכננים "יהיו מחויבים לשימוש" — מה רמת המעורבות?</div><div class="options"><div class="option" data-v="משתמשים פעילים"><div class="option-marker">א</div><div class="option-text"><strong>משתמשים פעילים</strong> — נכנסים, מעדכנים, מעלים</div></div><div class="option" data-v="צרכנים פסיביים"><div class="option-marker">ב</div><div class="option-text"><strong>צרכנים פסיביים</strong> — רואים, לא מזינים</div></div><div class="option" data-v="חובה מוגבלת"><div class="option-marker">ג</div><div class="option-text"><strong>חובה מוגבלת</strong> — נקודות ספציפיות בלבד</div></div></div></div>
+      <div class="question" data-q="13" data-type="single"><div class="q-header"><div class="q-num">13</div><span class="q-type">כן / לא</span></div><div class="q-text">האם מתכננים צריכים פרסונה ייעודית בבריף?</div><div class="options"><div class="option" data-v="כן — פרסונה חדשה"><div class="option-marker">✓</div><div class="option-text">כן — לבנות פרסונה חדשה</div></div><div class="option" data-v="לא — תחת פרסונה קיימת"><div class="option-marker">✗</div><div class="option-text">לא — להזכיר תחת פרסונה קיימת</div></div></div></div>
+      <div class="question" data-q="14" data-type="single"><div class="q-header"><div class="q-num">14</div><span class="q-type">כן / לא</span></div><div class="q-text">תפקידי הזנת נתונים — צריכים פרסונה ייעודית?</div><div class="q-context">מאור: "אנחנו לא ממציאים תפקידים חדשים"</div><div class="options"><div class="option" data-v="כן — פרסונה"><div class="option-marker">✓</div><div class="option-text">כן — לבנות פרסונה</div></div><div class="option" data-v="לא — תת-תפקיד"><div class="option-marker">✗</div><div class="option-text">לא — הזכרה כתת-תפקיד</div></div></div></div>
+      <div class="question" data-q="15" data-type="single"><div class="q-header"><div class="q-num">15</div><span class="q-type">כן / לא</span></div><div class="q-text">מאור: "תפקיד HR — לא רלוונטי". למחוק לגמרי?</div><div class="options"><div class="option" data-v="כן — למחוק כליל"><div class="option-marker">✓</div><div class="option-text">כן — למחוק כליל</div></div><div class="option" data-v="לא — שאלה פתוחה"><div class="option-marker">✗</div><div class="option-text">לא — להשאיר כשאלה פתוחה</div></div></div></div>
+      <div class="question" data-q="16" data-type="single"><div class="q-header"><div class="q-num">16</div><span class="q-type">בחירה יחידה</span></div><div class="q-text">אם לא HR, מי הבעלים של חוזי העסקה ודיווח שעות?</div><div class="options"><div class="option" data-v="מנהל כספים (אבי)"><div class="option-marker">א</div><div class="option-text">מנהל הכספים (אבי)</div></div><div class="option" data-v="בעל חברה (רמי)"><div class="option-marker">ב</div><div class="option-text">בעל החברה / מנכ"ל (רמי)</div></div><div class="option" data-v="תלוי בגודל החברה"><div class="option-marker">ג</div><div class="option-text">תלוי בגודל החברה</div></div></div></div>
+      <div class="question" data-q="17" data-type="multi"><div class="q-header"><div class="q-num">17</div><span class="q-type">בחירה מרובה</span></div><div class="q-text">אילו סוגי יזמים נכנסים לשוק היעד <strong>הראשון</strong>?</div><div class="options"><div class="option multi" data-v="יזמי נדל״ן פרטיים"><div class="option-marker">☐</div><div class="option-text">יזמי נדל"ן פרטיים</div></div><div class="option multi" data-v="חברות ממשלתיות"><div class="option-marker">☐</div><div class="option-text">חברות ממשלתיות (נת"ע, נמלי ישראל)</div></div><div class="option multi" data-v="רשויות מקומיות"><div class="option-marker">☐</div><div class="option-text">רשויות מקומיות (עיריות)</div></div><div class="option multi" data-v="כולם במקביל"><div class="option-marker">☐</div><div class="option-text">כולם במקביל</div></div></div></div>
+    </div>
+
+    <div class="section-card"><div class="section-header"><div class="section-num">ד</div><h2>מודל עסקי ותמחור</h2></div>
+      <div class="question" data-q="18" data-type="rank"><div class="q-header"><div class="q-num">18</div><span class="q-type">דירוג סדרתי</span></div><div class="q-text">דרגו את שלושת הפרמטרים לפי חשיבותם בקביעת המחיר:</div><div class="q-context">מאור: "הנטייה — לפי אומדן כספי, שלב תכנון וכמות מודולים". גררו כדי לסדר.</div><div class="rank-items"><div class="rank-item" draggable="true" data-v="אומדן כספי של הפרויקט"><span class="rank-grip">⠿</span><span class="rank-handle">1.</span><div class="option-text">אומדן כספי של הפרויקט (היקף)</div></div><div class="rank-item" draggable="true" data-v="שלב התכנון"><span class="rank-grip">⠿</span><span class="rank-handle">2.</span><div class="option-text">שלב התכנון (מוקדם / מפורט / ביצוע)</div></div><div class="rank-item" draggable="true" data-v="כמות המודולים"><span class="rank-grip">⠿</span><span class="rank-handle">3.</span><div class="option-text">כמות המודולים הנדרשת</div></div></div></div>
+      <div class="question" data-q="19" data-type="single"><div class="q-header"><div class="q-num">19</div><span class="q-type">בחירה יחידה</span></div><div class="q-text">האם לכלול גם רכיב <strong>לפי משתמש</strong> בנוסף?</div><div class="options"><div class="option" data-v="לא — ללא הגבלת משתמשים"><div class="option-marker">א</div><div class="option-text">לא — ללא הגבלה (מעודד אימוץ)</div></div><div class="option" data-v="כן — רכיב מחיר למשתמש"><div class="option-marker">ב</div><div class="option-text">כן — רכיב מחיר קטן למשתמש</div></div><div class="option" data-v="כן — מעל סף בלבד"><div class="option-marker">ג</div><div class="option-text">כן — מעל סף (10 חינם, נוסף בתשלום)</div></div></div></div>
+      <div class="question" data-q="20" data-type="single"><div class="q-header"><div class="q-num">20</div><span class="q-type">בחירה יחידה</span></div><div class="q-text">סדר גודל מחיר התחלתי (חברה בינונית, 2-3 מודולים)?</div><div class="options"><div class="option" data-v="₪1,500–3,000/חודש"><div class="option-marker">א</div><div class="option-text">₪1,500–3,000 לחודש</div></div><div class="option" data-v="₪3,000–6,000/חודש"><div class="option-marker">ב</div><div class="option-text">₪3,000–6,000 לחודש</div></div><div class="option" data-v="₪6,000–10,000/חודש"><div class="option-marker">ג</div><div class="option-text">₪6,000–10,000 לחודש</div></div><div class="option" data-v="מעל ₪10,000/חודש"><div class="option-marker">ד</div><div class="option-text">מעל ₪10,000 לחודש</div></div></div></div>
+    </div>
+
+    <div class="section-card"><div class="section-header"><div class="section-num">ה</div><h2>אסטרטגיה שיווקית והצגת טכנולוגיה</h2></div>
+      <div class="question" data-q="21" data-type="likert"><div class="q-header"><div class="q-num">21</div><span class="q-type">סולם 1–5</span></div><div class="q-text">עד כמה לחשוף פירוט על "האלגוריתם" בחומרים שיווקיים?</div><div class="q-context">מאור: "כן לשתף — זה יראה שזה מתוחכם"</div><div class="likert-scale"><div class="likert-item" data-v="1"><div class="likert-num">1</div><div class="likert-label">לא לחשוף</div></div><div class="likert-item" data-v="2"><div class="likert-num">2</div><div class="likert-label">הזכרה בלבד</div></div><div class="likert-item" data-v="3"><div class="likert-num">3</div><div class="likert-label">עקרון כללי</div></div><div class="likert-item" data-v="4"><div class="likert-num">4</div><div class="likert-label">עקרון + דוגמה</div></div><div class="likert-item" data-v="5"><div class="likert-num">5</div><div class="likert-label">חשיפה מלאה</div></div></div></div>
+      <div class="question" data-q="22" data-type="single"><div class="q-header"><div class="q-num">22</div><span class="q-type">בחירה יחידה</span></div><div class="q-text">רמת פירוט שונה <strong>למשקיעים</strong> לעומת <strong>חומרים ציבוריים</strong>?</div><div class="options"><div class="option" data-v="אותו פירוט"><div class="option-marker">א</div><div class="option-text">אותו פירוט לשניהם</div></div><div class="option" data-v="למשקיעים יותר"><div class="option-marker">ב</div><div class="option-text">למשקיעים יותר פירוט</div></div><div class="option" data-v="הפוך — ציבור דמו, משקיעים עסקי"><div class="option-marker">ג</div><div class="option-text">הפוך — ציבור דמו, משקיעים תמונה עסקית</div></div></div></div>
+      <div class="question" data-q="23" data-type="single"><div class="q-header"><div class="q-num">23</div><span class="q-type">בחירה יחידה</span></div><div class="q-text">בהצגת OptiTrack — מה להדגיש ראשון?</div><div class="options"><div class="option" data-v="מטריצת ההיתרים"><div class="option-marker">א</div><div class="option-text"><strong>מטריצת ההיתרים</strong> — הפיצ'ר הייחודי</div></div><div class="option" data-v="אוטומציית ג׳ימייל/מט״ל"><div class="option-marker">ב</div><div class="option-text"><strong>אוטומציית ג'ימייל/מט"ל</strong> — הדמו שמרשים</div></div><div class="option" data-v="תמונת שליטה כוללת"><div class="option-marker">ג</div><div class="option-text"><strong>תמונת שליטה כוללת</strong> — כמאור הרחיב</div></div></div></div>
+    </div>
+
+    <div class="section-card"><div class="section-header"><div class="section-num">ו</div><h2>שוק ונתונים</h2></div>
+      <div class="question" data-q="24" data-type="single"><div class="q-header"><div class="q-num">24</div><span class="q-type">בחירה יחידה</span></div><div class="q-text">"200 מיליארד ש"ח" — מאור: "להמשך בדיקה". מה לעשות?</div><div class="options"><div class="option" data-v="להשאיר עם ~ (אומדן)"><div class="option-marker">א</div><div class="option-text">להשאיר עם "~" (אומדן)</div></div><div class="option" data-v="ניסוח כללי — עשרות מיליארדים"><div class="option-marker">ב</div><div class="option-text">"שוק של עשרות מיליארדי ש"ח"</div></div><div class="option" data-v="להשאיר + הערת שוליים"><div class="option-marker">ג</div><div class="option-text">להשאיר + הערת שוליים (מקור בבדיקה)</div></div></div></div>
+      <div class="question" data-q="25" data-type="single"><div class="q-header"><div class="q-num">25</div><span class="q-type">בחירה יחידה</span></div><div class="q-text">הנתון "~10% תכנון וניהול = ~20 מיליארד" — האם:</div><div class="options"><div class="option" data-v="מדויק"><div class="option-marker">א</div><div class="option-text">מדויק — אפשר להשאיר</div></div><div class="option" data-v="אומדן גס — דורש אימות"><div class="option-marker">ב</div><div class="option-text">אומדן גס שדורש אימות</div></div><div class="option" data-v="שגוי — אחוז שונה"><div class="option-marker">ג</div><div class="option-text">שגוי — האחוז צריך להיות שונה</div></div></div></div>
+      <div class="question" data-q="26" data-type="single"><div class="q-header"><div class="q-num">26</div><span class="q-type">כן / לא</span></div><div class="q-text">האם לכלול גם מספר חברות יעד (לא רק מיליארדים)?</div><div class="options"><div class="option" data-v="כן — להראות כמות חברות"><div class="option-marker">✓</div><div class="option-text">כן — חשוב להראות כמה חברות</div></div><div class="option" data-v="לא — מספיקים נתונים כספיים"><div class="option-marker">✗</div><div class="option-text">לא — מספיקים נתוני שוק כספיים</div></div></div></div>
+    </div>
+
+    <div class="section-card"><div class="section-header"><div class="section-num">ז</div><h2>חזון עתידי ו-Roadmap</h2></div>
+      <div class="question" data-q="27" data-type="single"><div class="q-header"><div class="q-num">27</div><span class="q-type">בחירה יחידה</span></div><div class="q-text">מאור ציין "ארצות הברית" (לא "ארה"ב ואירופה"). מה לכתוב?</div><div class="options"><div class="option" data-v="ארצות הברית בלבד"><div class="option-marker">א</div><div class="option-text">ארצות הברית בלבד</div></div><div class="option" data-v="ארה״ב ואירופה (כבריף)"><div class="option-marker">ב</div><div class="option-text">ארה"ב ואירופה (כמו בבריף)</div></div><div class="option" data-v="ארה״ב ראשונה, אירופה שלב שני"><div class="option-marker">ג</div><div class="option-text">ארה"ב ראשונה, אירופה כשלב שני</div></div></div></div>
+      <div class="question" data-q="28" data-type="single"><div class="q-header"><div class="q-num">28</div><span class="q-type">בחירה יחידה</span></div><div class="q-text">מהו הסיפור על האלגוריתם ב-Roadmap?</div><div class="options"><div class="option" data-v="פיצ׳ר עתידי — בשנה 2"><div class="option-marker">א</div><div class="option-text"><strong>פיצ'ר עתידי</strong> — "בשנה 2 נפתח"</div></div><div class="option" data-v="יכולת שמתפתחת"><div class="option-marker">ב</div><div class="option-text"><strong>יכולת שמתפתחת</strong> — "כבר מקשרת, בשנה 2 אוטומטית"</div></div><div class="option" data-v="הבידול המרכזי — מודיעין לא ניהול"><div class="option-marker">ג</div><div class="option-text"><strong>הבידול המרכזי</strong> — "OptiPlan = מודיעין, לא ניהול"</div></div></div></div>
+      <div class="question" data-q="29" data-type="likert"><div class="q-header"><div class="q-num">29</div><span class="q-type">סולם 1–5</span></div><div class="q-text">עד כמה חשוב להציג חזון אקוסיסטם הסוכנים (AI agents) בבריף?</div><div class="likert-scale"><div class="likert-item" data-v="1"><div class="likert-num">1</div><div class="likert-label">לא להזכיר</div></div><div class="likert-item" data-v="2"><div class="likert-num">2</div><div class="likert-label">משפט אחד</div></div><div class="likert-item" data-v="3"><div class="likert-num">3</div><div class="likert-label">פסקה בחזון</div></div><div class="likert-item" data-v="4"><div class="likert-num">4</div><div class="likert-label">סעיף נפרד</div></div><div class="likert-item" data-v="5"><div class="likert-num">5</div><div class="likert-label">חלק מרכזי מגרסה 1</div></div></div></div>
+    </div>
+
+    <div class="section-card"><div class="section-header"><div class="section-num">ח</div><h2>לקוחות ממשלתיים ורגולציה</h2></div>
+      <div class="question" data-q="30" data-type="single"><div class="q-header"><div class="q-num">30</div><span class="q-type">בחירה יחידה</span></div><div class="q-text">לגבי לקוחות ממשלתיים — מאור: "שאלה טובה שאין לנו תשובה". מה לעשות?</div><div class="options"><div class="option" data-v="שאלה פתוחה בבריף"><div class="option-marker">א</div><div class="option-text">להשאיר כשאלה פתוחה</div></div><div class="option" data-v="להוציא מהבריף"><div class="option-marker">ב</div><div class="option-text">להוציא, לחזור כשתהיה תשובה</div></div><div class="option" data-v="פיצ׳ר עתידי — גרסה 2"><div class="option-marker">ג</div><div class="option-text">לכתוב כפיצ'ר עתידי — "גרסה 2"</div></div></div></div>
+      <div class="question" data-q="31" data-type="single"><div class="q-header"><div class="q-num">31</div><span class="q-type">בחירה יחידה</span></div><div class="q-text">גופים ממשלתיים בטבלת לקוחות יעד — כבר בגרסה 1?</div><div class="options"><div class="option" data-v="כן — לקוח יעד מהיום"><div class="option-marker">א</div><div class="option-text">כן — לקוח יעד מהיום</div></div><div class="option" data-v="לא — פרטי קודם"><div class="option-marker">ב</div><div class="option-text">לא — פרטי קודם, ממשלתי בשנה 2+</div></div><div class="option" data-v="כן — רק כיזם (מזמין)"><div class="option-marker">ג</div><div class="option-text">כן, אבל רק כיזם (מזמין), לא כמפעיל</div></div></div></div>
+    </div>
+
+    <div class="section-card"><div class="section-header"><div class="section-num">ט</div><h2>נרטיב ועריכה כללית</h2></div>
+      <div class="question" data-q="32" data-type="single"><div class="q-header"><div class="q-num">32</div><span class="q-type">בחירה יחידה</span></div><div class="q-text">מהו קהל היעד <strong>הראשי</strong> של הבריף המעודכן?</div><div class="options"><div class="option" data-v="צוות פיתוח (PRD prep)"><div class="option-marker">א</div><div class="option-text"><strong>צוות פיתוח</strong> (PRD prep)</div></div><div class="option" data-v="משקיעים ושותפים"><div class="option-marker">ב</div><div class="option-text"><strong>משקיעים ושותפים</strong> — מסמך חיצוני</div></div><div class="option" data-v="מסמך פנימי משולב"><div class="option-marker">ג</div><div class="option-text"><strong>מסמך פנימי משולב</strong> — פיתוח + אסטרטגיה</div></div></div></div>
+      <div class="question" data-q="33" data-type="multi"><div class="q-header"><div class="q-num">33</div><span class="q-type">בחירה מרובה</span></div><div class="q-text">בניסוח על העברית, אילו אלמנטים חשוב להדגיש?</div><div class="q-context">מאור: "נבנית בשפה העברית במטרה לתקוע יתד בשוק הישראלי"</div><div class="options"><div class="option multi" data-v="אסטרטגיה מכוונת"><div class="option-marker">☐</div><div class="option-text">עברית כ<strong>אסטרטגיה מכוונת</strong> ("תקיעת יתד")</div></div><div class="option multi" data-v="מפת דרכים בינלאומית"><div class="option-marker">☐</div><div class="option-text">מפת דרכים <strong>ברורה</strong> להתרחבות בינלאומית</div></div><div class="option multi" data-v="יתרון תחרותי"><div class="option-marker">☐</div><div class="option-text">עברית כ<strong>יתרון תחרותי</strong></div></div><div class="option multi" data-v="כולם"><div class="option-marker">☐</div><div class="option-text">כולם</div></div></div></div>
+      <div class="question" data-q="34" data-type="single"><div class="q-header"><div class="q-num">34</div><span class="q-type">כן / לא</span></div><div class="q-text">האם צריך סעיף "שאלות פתוחות לדיון" בבריף?</div><div class="options"><div class="option" data-v="כן — לתעד מה לא הוחלט"><div class="option-marker">✓</div><div class="option-text">כן — חשוב לתעד מה לא הוחלט</div></div><div class="option" data-v="לא — בריף מציג החלטות"><div class="option-marker">✗</div><div class="option-text">לא — בריף מציג החלטות בלבד</div></div></div></div>
+      <div class="question" data-q="35" data-type="single"><div class="q-header"><div class="q-num">35</div><span class="q-type">בחירה יחידה</span></div><div class="q-text">מאור כתב "עם שישה מוצרים ראשונים" — מה כוונתו?</div><div class="options"><div class="option" data-v="רק ההתחלה — יהיו עוד"><div class="option-marker">א</div><div class="option-text">הששה הם רק ההתחלה — יהיו עוד</div></div><div class="option" data-v="הפחתת ציפיות — לא סופיים"><div class="option-marker">ב</div><div class="option-text">הפחתת ציפיות — 6 ראשונים, לא סופיים</div></div><div class="option" data-v="מסר למשקיעים — כבר יש 6"><div class="option-marker">ג</div><div class="option-text">מסר למשקיעים — "כבר עכשיו יש 6"</div></div></div></div>
+    </div>
+
+    <div class="section-card"><div class="section-header"><div class="section-num">י</div><h2>אינטגרציות ויכולות טכניות</h2></div>
+      <div class="question" data-q="36" data-type="likert"><div class="q-header"><div class="q-num">36</div><span class="q-type">סולם 1–5</span></div><div class="q-text">עד כמה חשוב להזכיר את אוטומציית הג'ימייל/מט"ל כפיצ'ר קיים?</div><div class="likert-scale"><div class="likert-item" data-v="1"><div class="likert-num">1</div><div class="likert-label">פרט טכני</div></div><div class="likert-item" data-v="2"><div class="likert-num">2</div><div class="likert-label">הזכרה קצרה</div></div><div class="likert-item" data-v="3"><div class="likert-num">3</div><div class="likert-label">דוגמה בנרטיב</div></div><div class="likert-item" data-v="4"><div class="likert-num">4</div><div class="likert-label">הוכחת AI</div></div><div class="likert-item" data-v="5"><div class="likert-num">5</div><div class="likert-label">ה-wow moment</div></div></div></div>
+      <div class="question" data-q="37" data-type="single"><div class="q-header"><div class="q-num">37</div><span class="q-type">כן / לא</span></div><div class="q-text">האם הבריף צריך דיאגרמת ארכיטקטורה ויזואלית?</div><div class="options"><div class="option" data-v="כן — הצגה ויזואלית"><div class="option-marker">✓</div><div class="option-text">כן — הצגה ויזואלית</div></div><div class="option" data-v="לא — דיאגרמות ב-PRD"><div class="option-marker">✗</div><div class="option-text">לא — דיאגרמות ב-PRD</div></div></div></div>
+    </div>
+
+    <div class="section-card"><div class="section-header"><div class="section-num">Σ</div><h2>טבלת סיכום</h2></div>
+      <div style="padding: 24px;">
+        <table class="summary-table"><thead><tr><th>קטגוריה</th><th>שאלות</th><th>כמות</th></tr></thead><tbody>
+          <tr><td>א. מיתוג ושפה שיווקית</td><td>1–5</td><td>5</td></tr>
+          <tr><td>ב. ארכיטקטורת המוצר</td><td>6–10</td><td>5</td></tr>
+          <tr><td>ג. קהל היעד — פרסונות</td><td>11–17</td><td>7</td></tr>
+          <tr><td>ד. מודל עסקי ותמחור</td><td>18–20</td><td>3</td></tr>
+          <tr><td>ה. אסטרטגיה שיווקית</td><td>21–23</td><td>3</td></tr>
+          <tr><td>ו. שוק ונתונים</td><td>24–26</td><td>3</td></tr>
+          <tr><td>ז. חזון עתידי ו-Roadmap</td><td>27–29</td><td>3</td></tr>
+          <tr><td>ח. לקוחות ממשלתיים</td><td>30–31</td><td>2</td></tr>
+          <tr><td>ט. נרטיב ועריכה</td><td>32–35</td><td>4</td></tr>
+          <tr><td>י. אינטגרציות וטכנולוגיה</td><td>36–37</td><td>2</td></tr>
+          <tr><td><strong>סה"כ</strong></td><td></td><td><strong>37</strong></td></tr>
+        </tbody></table>
+      </div>
+    </div>
+
+    <footer class="page-footer">
+      <span class="footer-brand">OptiPlan</span>
+      <span class="footer-separator">·</span>
+      <span class="footer-tagline">AI-Powered Infrastructure Intelligence</span>
+      <span class="footer-meta">18.02.2026 · Prepared by OPIUM</span>
+    </footer>
+  </div>
+
+  <div class="export-bar">
+    <div class="export-bar-inner">
+      <div class="export-status" id="barStatus">0 / 37 שאלות נענו</div>
+      <div style="display: flex; gap: 12px; align-items: center;">
+        <button class="reset-btn" onclick="resetAll()">איפוס</button>
+        <button class="export-btn" onclick="exportJSON()">⬇ ייצוא JSON</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  const A={},T=37,QT={};
+  document.querySelectorAll('.question[data-q]').forEach(q=>{QT[q.dataset.q]={text:q.querySelector('.q-text').textContent.trim(),type:q.dataset.type}});
+  document.querySelectorAll('.question[data-type="single"] .option').forEach(o=>{o.addEventListener('click',()=>{const q=o.closest('.question'),n=q.dataset.q;q.querySelectorAll('.option').forEach(x=>x.classList.remove('sel'));o.classList.add('sel');A[n]=o.dataset.v;up()})});
+  document.querySelectorAll('.question[data-type="multi"] .option').forEach(o=>{o.addEventListener('click',()=>{const q=o.closest('.question'),n=q.dataset.q;o.classList.toggle('sel');o.querySelector('.option-marker').textContent=o.classList.contains('sel')?'✓':'☐';const s=[...q.querySelectorAll('.option.sel')].map(x=>x.dataset.v);s.length?A[n]=s:delete A[n];up()})});
+  document.querySelectorAll('.question[data-type="likert"] .likert-item').forEach(i=>{i.addEventListener('click',()=>{const q=i.closest('.question'),n=q.dataset.q;q.querySelectorAll('.likert-item').forEach(x=>x.classList.remove('sel'));i.classList.add('sel');A[n]=parseInt(i.dataset.v);up()})});
+  document.querySelectorAll('.question[data-type="rank"]').forEach(q=>{const c=q.querySelector('.rank-items');let di=null;c.querySelectorAll('.rank-item').forEach(item=>{item.addEventListener('dragstart',e=>{di=item;item.classList.add('dragging');e.dataTransfer.effectAllowed='move'});item.addEventListener('dragend',()=>{item.classList.remove('dragging');c.querySelectorAll('.rank-item').forEach(x=>x.classList.remove('drag-over'));renum(q)});item.addEventListener('dragover',e=>{e.preventDefault();if(item!==di)item.classList.add('drag-over')});item.addEventListener('dragleave',()=>item.classList.remove('drag-over'));item.addEventListener('drop',e=>{e.preventDefault();item.classList.remove('drag-over');if(item!==di){const all=[...c.querySelectorAll('.rank-item')];all.indexOf(di)<all.indexOf(item)?c.insertBefore(di,item.nextSibling):c.insertBefore(di,item);renum(q)}})});renum(q)});
+  function renum(q){const n=q.dataset.q,ord=[];q.querySelectorAll('.rank-item').forEach((item,i)=>{item.querySelector('.rank-handle').textContent=(i+1)+'.';ord.push(item.dataset.v)});A[n]=ord;up()}
+  function up(){const c=Object.keys(A).length,pct=Math.round(c/T*100);document.getElementById('pFill').style.width=pct+'%';document.getElementById('pText').textContent=c+' / '+T+' שאלות נענו';document.getElementById('barStatus').innerHTML='<strong>'+c+'</strong> / '+T+' שאלות נענו';document.querySelectorAll('.question[data-q]').forEach(q=>{q.querySelector('.q-num').classList.toggle('done',A[q.dataset.q]!==undefined)})}
+  function exportJSON(){const out={meta:{title:'שאלון חידוד בריף — OptiPlan',exported_at:new Date().toISOString(),total_questions:T,answered:Object.keys(A).length,respondent:'מאור דהן / עמית זומרפרוינד'},responses:{}};for(let i=1;i<=T;i++){const k=String(i),m=QT[k];out.responses[k]={question:m?m.text:'',type:m?m.type:'',answer:A[k]!==undefined?A[k]:null}}const b=new Blob([JSON.stringify(out,null,2)],{type:'application/json'}),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download='optiplan-brief-questionnaire-responses.json';document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(u)}
+  function resetAll(){if(!confirm('האם לאפס את כל התשובות?'))return;for(const k in A)delete A[k];document.querySelectorAll('.option.sel').forEach(o=>{o.classList.remove('sel');if(o.classList.contains('multi'))o.querySelector('.option-marker').textContent='☐'});document.querySelectorAll('.likert-item.sel').forEach(i=>i.classList.remove('sel'));document.querySelectorAll('.question[data-type="rank"]').forEach(renum);up()}
+  up();
+  </script>
+</body>
+</html>
