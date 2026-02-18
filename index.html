@@ -46,9 +46,18 @@
     .section-header { background: var(--navy); color: var(--white); padding: 16px 24px; display: flex; align-items: center; gap: 12px; }
     .section-header h2 { color: var(--white); margin: 0; font-size: 1.25rem; }
     .section-num { background: rgba(255,255,255,0.2); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; flex-shrink: 0; }
-    .question { padding: 24px; border-bottom: 1px solid var(--ice); }
+    .question { padding: 24px; border-bottom: 1px solid var(--ice); transition: border-color 0.3s ease; border-right: 3px solid transparent; }
     .question:last-child { border-bottom: none; }
-    .q-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+    .question.answered { border-right-color: var(--success); }
+    .question .q-body { max-height: 5000px; opacity: 1; transition: max-height 0.4s ease, opacity 0.3s ease, margin 0.3s ease; overflow: hidden; }
+    .question.collapsed .q-body { max-height: 0; opacity: 0; margin-top: 0; }
+    .question.collapsed .q-text { margin-bottom: 4px; }
+    .q-answer-summary { display: none; font-size: 0.85rem; color: var(--success); font-weight: 600; line-height: 1.4; margin-top: 4px; }
+    .question.collapsed .q-answer-summary { display: block; }
+    .q-expand-icon { margin-right: auto; margin-left: 0; font-size: 0.7rem; color: var(--text-light); transition: transform 0.3s ease; display: none; }
+    .question.answered .q-expand-icon { display: inline-block; }
+    .question.collapsed .q-expand-icon { transform: rotate(180deg); }
+    .q-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; cursor: pointer; user-select: none; }
     .q-num { background: var(--steel); color: var(--white); width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.75rem; flex-shrink: 0; transition: background 0.2s; }
     .q-num.done { background: var(--success); }
     .q-type { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--text-light); background: var(--ice); padding: 2px 8px; border-radius: 2px; }
@@ -94,8 +103,20 @@
     .footer-separator { color: var(--sky); margin: 0 8px; }
     .footer-tagline { font-size: 0.8rem; color: var(--text-light); }
     .footer-meta { display: block; margin-top: 8px; font-size: 0.75rem; color: var(--text-light); }
-    @media (max-width: 600px) { .page-container { padding: 20px 16px 100px; } .meta-grid { grid-template-columns: 1fr; } .likert-scale { flex-direction: column; } .likert-item { min-width: unset; } }
-    @media print { body { background: white; } .export-bar { display: none; } }
+    .q-note-toggle { display: inline-flex; align-items: center; gap: 4px; margin-top: 12px; font-size: 0.8rem; color: var(--steel); cursor: pointer; border: none; background: none; font-family: 'Varela Round', sans-serif; padding: 4px 0; }
+    .q-note-toggle:hover { color: var(--navy); }
+    .q-note-area { display: none; margin-top: 8px; }
+    .q-note-area.open { display: block; }
+    .q-note-area textarea { width: 100%; min-height: 60px; border: 1px solid var(--ice); border-radius: 4px; padding: 10px 12px; font-family: 'Varela Round', sans-serif; font-size: 0.85rem; color: var(--text); resize: vertical; direction: rtl; line-height: 1.5; }
+    .q-note-area textarea:focus { outline: none; border-color: var(--steel); box-shadow: 0 0 0 2px rgba(74,134,184,0.15); }
+    .q-note-indicator { font-size: 0.75rem; color: var(--warning); margin-right: 4px; }
+    .sticky-progress { position: fixed; top: 0; left: 0; right: 0; z-index: 99; background: var(--white); border-bottom: 1px solid var(--ice); padding: 10px 32px; box-shadow: 0 2px 8px rgba(27,54,93,0.08); transform: translateY(-100%); transition: transform 0.3s ease; }
+    .sticky-progress.visible { transform: translateY(0); }
+    .sticky-progress-inner { max-width: 900px; margin: 0 auto; display: flex; align-items: center; gap: 12px; }
+    .sticky-progress-inner .progress-bar { flex: 1; }
+    .sticky-progress-inner .progress-text { margin: 0; white-space: nowrap; }
+    @media (max-width: 600px) { .page-container { padding: 20px 16px 100px; } .meta-grid { grid-template-columns: 1fr; } .likert-scale { flex-direction: column; } .likert-item { min-width: unset; } .sticky-progress { padding: 8px 16px; } }
+    @media print { body { background: white; } .export-bar, .sticky-progress { display: none; } }
   </style>
 </head>
 <body>
@@ -223,17 +244,366 @@
   </div>
 
   <script>
-  const A={},T=37,QT={};
-  document.querySelectorAll('.question[data-q]').forEach(q=>{QT[q.dataset.q]={text:q.querySelector('.q-text').textContent.trim(),type:q.dataset.type}});
-  document.querySelectorAll('.question[data-type="single"] .option').forEach(o=>{o.addEventListener('click',()=>{const q=o.closest('.question'),n=q.dataset.q;q.querySelectorAll('.option').forEach(x=>x.classList.remove('sel'));o.classList.add('sel');A[n]=o.dataset.v;up()})});
-  document.querySelectorAll('.question[data-type="multi"] .option').forEach(o=>{o.addEventListener('click',()=>{const q=o.closest('.question'),n=q.dataset.q;o.classList.toggle('sel');o.querySelector('.option-marker').textContent=o.classList.contains('sel')?'✓':'☐';const s=[...q.querySelectorAll('.option.sel')].map(x=>x.dataset.v);s.length?A[n]=s:delete A[n];up()})});
-  document.querySelectorAll('.question[data-type="likert"] .likert-item').forEach(i=>{i.addEventListener('click',()=>{const q=i.closest('.question'),n=q.dataset.q;q.querySelectorAll('.likert-item').forEach(x=>x.classList.remove('sel'));i.classList.add('sel');A[n]=parseInt(i.dataset.v);up()})});
-  document.querySelectorAll('.question[data-type="rank"]').forEach(q=>{const c=q.querySelector('.rank-items');let di=null;c.querySelectorAll('.rank-item').forEach(item=>{item.addEventListener('dragstart',e=>{di=item;item.classList.add('dragging');e.dataTransfer.effectAllowed='move'});item.addEventListener('dragend',()=>{item.classList.remove('dragging');c.querySelectorAll('.rank-item').forEach(x=>x.classList.remove('drag-over'));renum(q)});item.addEventListener('dragover',e=>{e.preventDefault();if(item!==di)item.classList.add('drag-over')});item.addEventListener('dragleave',()=>item.classList.remove('drag-over'));item.addEventListener('drop',e=>{e.preventDefault();item.classList.remove('drag-over');if(item!==di){const all=[...c.querySelectorAll('.rank-item')];all.indexOf(di)<all.indexOf(item)?c.insertBefore(di,item.nextSibling):c.insertBefore(di,item);renum(q)}})});renum(q)});
-  function renum(q){const n=q.dataset.q,ord=[];q.querySelectorAll('.rank-item').forEach((item,i)=>{item.querySelector('.rank-handle').textContent=(i+1)+'.';ord.push(item.dataset.v)});A[n]=ord;up()}
-  function up(){const c=Object.keys(A).length,pct=Math.round(c/T*100);document.getElementById('pFill').style.width=pct+'%';document.getElementById('pText').textContent=c+' / '+T+' שאלות נענו';document.getElementById('barStatus').innerHTML='<strong>'+c+'</strong> / '+T+' שאלות נענו';document.querySelectorAll('.question[data-q]').forEach(q=>{q.querySelector('.q-num').classList.toggle('done',A[q.dataset.q]!==undefined)})}
-  function exportJSON(){const out={meta:{title:'שאלון חידוד בריף — OptiPlan',exported_at:new Date().toISOString(),total_questions:T,answered:Object.keys(A).length,respondent:'מאור דהן / עמית זומרפרוינד'},responses:{}};for(let i=1;i<=T;i++){const k=String(i),m=QT[k];out.responses[k]={question:m?m.text:'',type:m?m.type:'',answer:A[k]!==undefined?A[k]:null}}const b=new Blob([JSON.stringify(out,null,2)],{type:'application/json'}),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download='optiplan-brief-questionnaire-responses.json';document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(u)}
-  function resetAll(){if(!confirm('האם לאפס את כל התשובות?'))return;for(const k in A)delete A[k];document.querySelectorAll('.option.sel').forEach(o=>{o.classList.remove('sel');if(o.classList.contains('multi'))o.querySelector('.option-marker').textContent='☐'});document.querySelectorAll('.likert-item.sel').forEach(i=>i.classList.remove('sel'));document.querySelectorAll('.question[data-type="rank"]').forEach(renum);up()}
-  up();
+  /* ── Globals ── */
+  const A = {}, C = {}, T = 37, QT = {};
+
+  /* ── Build question metadata ── */
+  document.querySelectorAll('.question[data-q]').forEach(q => {
+    QT[q.dataset.q] = { text: q.querySelector('.q-text').textContent.trim(), type: q.dataset.type };
+  });
+
+  /* ── Feature 4: Inject sticky progress bar ── */
+  const stickyBar = document.createElement('div');
+  stickyBar.className = 'sticky-progress';
+  stickyBar.innerHTML = '<div class="sticky-progress-inner">' +
+    '<span class="logo-text">OptiPlan</span>' +
+    '<div class="progress-bar" style="flex:1"><div class="progress-fill" id="pFillSticky"></div></div>' +
+    '<div class="progress-text" id="pTextSticky">0 / 37 שאלות נענו</div></div>';
+  document.body.insertBefore(stickyBar, document.body.firstChild);
+
+  /* ── Feature 3: Wrap question bodies + accordion setup ── */
+  document.querySelectorAll('.question[data-q]').forEach(q => {
+    const header = q.querySelector('.q-header');
+    const qText = q.querySelector('.q-text');
+
+    // Add expand icon
+    const icon = document.createElement('span');
+    icon.className = 'q-expand-icon';
+    icon.textContent = '\u25B2';
+    header.appendChild(icon);
+
+    // Create answer summary element (placed after q-text so question text is always visible)
+    const afterText = qText ? qText.nextSibling : header.nextSibling;
+    const summary = document.createElement('div');
+    summary.className = 'q-answer-summary';
+    q.insertBefore(summary, afterText);
+
+    // Wrap remaining content (context, options, etc.) into .q-body
+    const body = document.createElement('div');
+    body.className = 'q-body';
+    while (summary.nextSibling) {
+      body.appendChild(summary.nextSibling);
+    }
+    q.appendChild(body);
+
+    // Toggle collapse on header click
+    header.addEventListener('click', () => {
+      if (!q.classList.contains('answered')) return;
+      const wasCollapsed = q.classList.contains('collapsed');
+      q.classList.toggle('collapsed');
+      if (wasCollapsed) {
+        q._justExpanded = true;
+        setTimeout(() => { q._justExpanded = false; }, 15000);
+      }
+    });
+  });
+
+  /* ── Feature 2: Inject comment UI ── */
+  document.querySelectorAll('.question[data-q]').forEach(q => {
+    const n = q.dataset.q;
+    const body = q.querySelector('.q-body');
+
+    const noteToggle = document.createElement('button');
+    noteToggle.className = 'q-note-toggle';
+    noteToggle.type = 'button';
+    noteToggle.textContent = '\uD83D\uDCDD הוסף הערה';
+
+    const noteArea = document.createElement('div');
+    noteArea.className = 'q-note-area';
+    const ta = document.createElement('textarea');
+    ta.placeholder = 'הערה אופציונלית...';
+    ta.setAttribute('data-note-q', n);
+    noteArea.appendChild(ta);
+
+    noteToggle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      noteArea.classList.toggle('open');
+      noteToggle.textContent = noteArea.classList.contains('open')
+        ? '\uD83D\uDCDD הסתר הערה' : '\uD83D\uDCDD הוסף הערה';
+    });
+
+    ta.addEventListener('input', () => {
+      const val = ta.value.trim();
+      if (val) { C[n] = val; } else { delete C[n]; }
+      localStorage.setItem('optiplan-brief-comments', JSON.stringify(C));
+    });
+
+    ta.addEventListener('click', (e) => e.stopPropagation());
+
+    body.appendChild(noteToggle);
+    body.appendChild(noteArea);
+  });
+
+  /* ── Event listeners: Single choice ── */
+  document.querySelectorAll('.question[data-type="single"] .option').forEach(o => {
+    o.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const q = o.closest('.question'), n = q.dataset.q;
+      q.querySelectorAll('.option').forEach(x => x.classList.remove('sel'));
+      o.classList.add('sel');
+      A[n] = o.dataset.v;
+      q._justExpanded = false;
+      up();
+    });
+  });
+
+  /* ── Event listeners: Multiple choice ── */
+  document.querySelectorAll('.question[data-type="multi"] .option').forEach(o => {
+    o.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const q = o.closest('.question'), n = q.dataset.q;
+      o.classList.toggle('sel');
+      o.querySelector('.option-marker').textContent = o.classList.contains('sel') ? '\u2713' : '\u2610';
+      const s = [...q.querySelectorAll('.option.sel')].map(x => x.dataset.v);
+      s.length ? A[n] = s : delete A[n];
+      q._justExpanded = false;
+      up();
+    });
+  });
+
+  /* ── Event listeners: Likert scale ── */
+  document.querySelectorAll('.question[data-type="likert"] .likert-item').forEach(i => {
+    i.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const q = i.closest('.question'), n = q.dataset.q;
+      q.querySelectorAll('.likert-item').forEach(x => x.classList.remove('sel'));
+      i.classList.add('sel');
+      A[n] = parseInt(i.dataset.v);
+      q._justExpanded = false;
+      up();
+    });
+  });
+
+  /* ── Event listeners: Rank (drag & drop) ── */
+  document.querySelectorAll('.question[data-type="rank"]').forEach(q => {
+    const c = q.querySelector('.rank-items');
+    let di = null;
+    c.querySelectorAll('.rank-item').forEach(item => {
+      item.addEventListener('dragstart', e => {
+        di = item; item.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move';
+      });
+      item.addEventListener('dragend', () => {
+        item.classList.remove('dragging');
+        c.querySelectorAll('.rank-item').forEach(x => x.classList.remove('drag-over'));
+        q.dataset.touched = 'true';
+        q._justExpanded = false;
+        renum(q);
+      });
+      item.addEventListener('dragover', e => { e.preventDefault(); if (item !== di) item.classList.add('drag-over'); });
+      item.addEventListener('dragleave', () => item.classList.remove('drag-over'));
+      item.addEventListener('drop', e => {
+        e.preventDefault(); item.classList.remove('drag-over');
+        if (item !== di) {
+          const all = [...c.querySelectorAll('.rank-item')];
+          all.indexOf(di) < all.indexOf(item) ? c.insertBefore(di, item.nextSibling) : c.insertBefore(di, item);
+        }
+      });
+    });
+    // Initial numbering without marking as answered
+    q.querySelectorAll('.rank-item').forEach((item, i) => {
+      item.querySelector('.rank-handle').textContent = (i + 1) + '.';
+    });
+  });
+
+  /* ── Helper: Renumber rank items ── */
+  function renum(q) {
+    const n = q.dataset.q, ord = [];
+    q.querySelectorAll('.rank-item').forEach((item, i) => {
+      item.querySelector('.rank-handle').textContent = (i + 1) + '.';
+      ord.push(item.dataset.v);
+    });
+    if (q.dataset.touched === 'true') { A[n] = ord; }
+    up();
+  }
+
+  /* ── Helper: Get summary text for collapsed view ── */
+  function getSummaryText(qNum, type, val) {
+    if (type === 'single') return val;
+    if (type === 'multi' && Array.isArray(val)) return val.join(', ');
+    if (type === 'likert') return val + ' / 5';
+    if (type === 'rank' && Array.isArray(val)) return val.map((v, i) => (i + 1) + '. ' + v).join(' | ');
+    return '';
+  }
+
+  /* ── Core: Update progress + accordion + save ── */
+  function up() {
+    const c = Object.keys(A).length, pct = Math.round(c / T * 100);
+
+    // Update progress bars
+    document.getElementById('pFill').style.width = pct + '%';
+    document.getElementById('pText').textContent = c + ' / ' + T + ' שאלות נענו';
+    document.getElementById('barStatus').innerHTML = '<strong>' + c + '</strong> / ' + T + ' שאלות נענו';
+    document.getElementById('pFillSticky').style.width = pct + '%';
+    document.getElementById('pTextSticky').textContent = c + ' / ' + T + ' שאלות נענו';
+
+    // Update each question state
+    document.querySelectorAll('.question[data-q]').forEach(q => {
+      const n = q.dataset.q;
+      const isAnswered = A[n] !== undefined;
+      q.querySelector('.q-num').classList.toggle('done', isAnswered);
+      q.classList.toggle('answered', isAnswered);
+
+      // Update summary text
+      const summary = q.querySelector('.q-answer-summary');
+      if (summary && isAnswered) {
+        summary.textContent = getSummaryText(n, q.dataset.type, A[n]);
+      } else if (summary) {
+        summary.textContent = '';
+      }
+
+      // Auto-collapse answered questions (unless user just expanded)
+      if (isAnswered && !q.classList.contains('collapsed') && !q._justExpanded) {
+        setTimeout(() => {
+          if (A[n] !== undefined && !q._justExpanded) {
+            q.classList.add('collapsed');
+          }
+        }, 500);
+      }
+
+      // Un-collapse and un-answer if answer was removed
+      if (!isAnswered) {
+        q.classList.remove('collapsed', 'answered');
+      }
+    });
+
+    save();
+  }
+
+  /* ── Core: Save to localStorage ── */
+  function save() {
+    localStorage.setItem('optiplan-brief-answers', JSON.stringify(A));
+  }
+
+  /* ── Core: Restore from localStorage ── */
+  function restore() {
+    // Restore answers
+    const saved = localStorage.getItem('optiplan-brief-answers');
+    if (saved) {
+      const data = JSON.parse(saved);
+      for (const [qNum, val] of Object.entries(data)) {
+        A[qNum] = val;
+        const qEl = document.querySelector('.question[data-q="' + qNum + '"]');
+        if (!qEl) continue;
+        const type = qEl.dataset.type;
+
+        if (type === 'single') {
+          qEl.querySelectorAll('.option').forEach(o => o.classList.toggle('sel', o.dataset.v === val));
+        } else if (type === 'multi' && Array.isArray(val)) {
+          qEl.querySelectorAll('.option').forEach(o => {
+            const isSel = val.includes(o.dataset.v);
+            o.classList.toggle('sel', isSel);
+            o.querySelector('.option-marker').textContent = isSel ? '\u2713' : '\u2610';
+          });
+        } else if (type === 'likert') {
+          qEl.querySelectorAll('.likert-item').forEach(li => li.classList.toggle('sel', parseInt(li.dataset.v) === val));
+        } else if (type === 'rank' && Array.isArray(val)) {
+          const container = qEl.querySelector('.rank-items');
+          val.forEach(v => {
+            const item = [...container.querySelectorAll('.rank-item')].find(i => i.dataset.v === v);
+            if (item) container.appendChild(item);
+          });
+          qEl.dataset.touched = 'true';
+          qEl.querySelectorAll('.rank-item').forEach((item, i) => {
+            item.querySelector('.rank-handle').textContent = (i + 1) + '.';
+          });
+        }
+      }
+    }
+
+    // Restore comments
+    const savedComments = localStorage.getItem('optiplan-brief-comments');
+    if (savedComments) {
+      const cData = JSON.parse(savedComments);
+      for (const [qNum, text] of Object.entries(cData)) {
+        C[qNum] = text;
+        const ta = document.querySelector('textarea[data-note-q="' + qNum + '"]');
+        if (ta) {
+          ta.value = text;
+          const noteArea = ta.closest('.q-note-area');
+          noteArea.classList.add('open');
+          const toggle = noteArea.previousElementSibling;
+          if (toggle) toggle.textContent = '\uD83D\uDCDD הסתר הערה';
+        }
+      }
+    }
+
+    up();
+  }
+
+  /* ── Core: Export JSON ── */
+  function exportJSON() {
+    const out = {
+      meta: {
+        title: 'שאלון חידוד בריף — OptiPlan',
+        exported_at: new Date().toISOString(),
+        total_questions: T,
+        answered: Object.keys(A).length,
+        respondent: 'מאור דהן / עמית זומרפרוינד'
+      },
+      responses: {}
+    };
+    for (let i = 1; i <= T; i++) {
+      const k = String(i), m = QT[k];
+      out.responses[k] = {
+        question: m ? m.text : '',
+        type: m ? m.type : '',
+        answer: A[k] !== undefined ? A[k] : null,
+        comment: C[k] || null
+      };
+    }
+    const b = new Blob([JSON.stringify(out, null, 2)], { type: 'application/json' });
+    const u = URL.createObjectURL(b);
+    const a = document.createElement('a');
+    a.href = u;
+    a.download = 'optiplan-brief-questionnaire-responses.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(u);
+  }
+
+  /* ── Core: Reset all ── */
+  function resetAll() {
+    if (!confirm('האם לאפס את כל התשובות?')) return;
+    for (const k in A) delete A[k];
+    for (const k in C) delete C[k];
+    localStorage.removeItem('optiplan-brief-answers');
+    localStorage.removeItem('optiplan-brief-comments');
+
+    // Clear visual selections
+    document.querySelectorAll('.option.sel').forEach(o => {
+      o.classList.remove('sel');
+      if (o.classList.contains('multi')) o.querySelector('.option-marker').textContent = '\u2610';
+    });
+    document.querySelectorAll('.likert-item.sel').forEach(i => i.classList.remove('sel'));
+    document.querySelectorAll('.question.collapsed').forEach(q => q.classList.remove('collapsed', 'answered'));
+    document.querySelectorAll('.q-answer-summary').forEach(s => { s.textContent = ''; });
+    document.querySelectorAll('.q-note-area textarea').forEach(ta => { ta.value = ''; });
+    document.querySelectorAll('.q-note-area.open').forEach(na => na.classList.remove('open'));
+    document.querySelectorAll('.q-note-toggle').forEach(t => { t.textContent = '\uD83D\uDCDD הוסף הערה'; });
+
+    // Reset rank questions
+    document.querySelectorAll('.question[data-type="rank"]').forEach(q => {
+      q.dataset.touched = '';
+      q.querySelectorAll('.rank-item').forEach((item, i) => {
+        item.querySelector('.rank-handle').textContent = (i + 1) + '.';
+      });
+    });
+
+    up();
+  }
+
+  /* ── Feature 4: IntersectionObserver for sticky bar ── */
+  const pageHeader = document.querySelector('.page-header');
+  const stickyObserver = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      stickyBar.classList.toggle('visible', !entry.isIntersecting);
+    });
+  }, { threshold: 0 });
+  stickyObserver.observe(pageHeader);
+
+  /* ── Init ── */
+  restore();
   </script>
 </body>
 </html>
