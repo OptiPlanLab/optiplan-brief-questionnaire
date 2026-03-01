@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nAdd localStorage persistence, comments, accordion, and sticky progress bar\n\n- Save/restore answers and comments to localStorage on every change\n- Add optional note/comment textarea per question \\(included in JSON export\\)\n- Answered questions collapse with green border and answer summary; expandable to edit\n- Sticky progress bar appears at top when scrolling past header\n- Fix rank questions to only count as answered after user interaction\n\nCo-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git push:*)"
+    ]
+  }
+}
